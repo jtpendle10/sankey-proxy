@@ -1,3 +1,4 @@
+// index.js
 const express = require('express');
 const fetch = require('node-fetch');
 const bodyParser = require('body-parser');
@@ -5,24 +6,30 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 
-// Replace this with your actual, final Render‐provided domain or localhost for testing
+// Your fallback token (exactly as you had it in your previous JS file)
+const FALLBACK_API_TOKEN = "token niou_YkiaMScYAxbh4fwn3Mx2Hpzeh3n9Va5UBVSW";
+
+// The true upstream GraphQL endpoint (with the name=fetch_vis_data query param)
 const TARGET_GRAPHQL = 'https://wlgore.api.ndustrial.io/graphql?name=fetch_vis_data';
 
+// Allow CORS from any origin (or lock it down to your domain if desired)
 app.use((req, res, next) => {
-  // Allow any origin (or lock down to your domain)
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
 
+// POST /api/graphql will forward to the real API with Authorization header
 app.post('/api/graphql', async (req, res) => {
   try {
-    const originalBody = req.body;
-    // Forward the incoming body exactly to the target GraphQL endpoint
+    // Forward the exact JSON body to the upstream GraphQL
     const response = await fetch(TARGET_GRAPHQL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(originalBody)
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': FALLBACK_API_TOKEN
+      },
+      body: JSON.stringify(req.body)
     });
     const data = await response.json();
     res.json(data);
@@ -32,8 +39,7 @@ app.post('/api/graphql', async (req, res) => {
   }
 });
 
-// Render will set PORT via environment variable
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`🚀 Proxy listening on port ${port}`);
+  console.log(`🚀 Gore‐GraphQL proxy listening on port ${port}`);
 });
