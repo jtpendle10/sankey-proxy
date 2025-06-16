@@ -1,29 +1,22 @@
-// index.js
 const express    = require('express');
 const fetch      = require('node-fetch');
 const bodyParser = require('body-parser');
+const cors       = require('cors');
 
 const app = express();
+
+// 1) Enable CORS for your GitHub Pages origin (or use '*' for any)
+app.use(cors({
+  origin: 'https://jtpendle10.github.io',
+  methods: ['POST','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization','User-Agent']
+}));
+
 app.use(bodyParser.json());
 
-// YOUR RAW TOKEN (no “token ” prefix here)
 const FALLBACK_API_TOKEN = "niou_Fls0b1bGpTnC6kquMP16SVFn0dE3NORIXNet";
+const TARGET_GRAPHQL     = 'https://wlgore.api.ndustrial.io/graphql';
 
-// Upstream GraphQL endpoint (no query-param)
-const TARGET_GRAPHQL = 'https://wlgore.api.ndustrial.io/graphql';
-
-// ─── 1. CORS MIDDLEWARE ────────────────────────────────────────────
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin",  "*");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, User-Agent");
-  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// ─── 2. GRAPHQL FORWARDING ────────────────────────────────────────
 app.post("/api/graphql", async (req, res) => {
   try {
     const response = await fetch(TARGET_GRAPHQL, {
@@ -36,14 +29,12 @@ app.post("/api/graphql", async (req, res) => {
       body: JSON.stringify(req.body)
     });
     const data = await response.json();
-    return res.json(data);
+    res.json(data);
   } catch (err) {
     console.error("Proxy error:", err);
-    return res.status(500).json({ error: "Proxy request failed" });
+    res.status(500).json({ error: "Proxy request failed" });
   }
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`🚀 Gore‐GraphQL proxy listening on port ${port}`);
-});
+app.listen(port, () => console.log(`Proxy listening on ${port}`));
