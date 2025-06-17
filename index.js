@@ -20,7 +20,7 @@ app.options('*', cors());
 app.use(bodyParser.json());
 
 // 4) Your token & target URL
-const FALLBACK_API_TOKEN = "niou_YkiaMScYAxbh4fwn3Mx2Hpzeh3n9Va5UBVSW";
+const FALLBACK_API_TOKEN = "niou_Fls0b1bGpTnC6kquMP16SVFn0dE3NORIXNet";
 const TARGET_GRAPHQL     = 'https://wlgore.api.ndustrial.io/graphql';
 
 // 5) Forward POST /api/graphql
